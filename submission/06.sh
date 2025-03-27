@@ -10,6 +10,6 @@ decoded_json="$(bitcoin-cli -regtest decoderawtransaction "$raw_tx")"
 # Sum all vout[].value fields, converting BTC to satoshis
 # 1 BTC = 100,000,000 satoshis
 total_sats="$(echo "$decoded_json" \
-  | jq '[ .vout[].value ] | map((. * 100000000) | floor) | add')"
+  | jq '[ .vout[].value ] | map((. * 100000000) ) | add')"
 
 echo "$total_sats"
