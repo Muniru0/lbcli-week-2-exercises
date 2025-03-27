@@ -28,5 +28,4 @@ unsigned_hex="$(
 )"
 
 # 5) Output the hex
-echo "Raw unsigned transaction:"
 echo "$unsigned_hex"
