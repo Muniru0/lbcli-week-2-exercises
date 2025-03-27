@@ -6,41 +6,36 @@
 
 
 #!/usr/bin/env bash
-
 # The two UTXOs from your old transaction:
-PREV_TXID="23c19f37d4e92e9a115aab86e4edc1b92a51add4e0ed0034bb166314dde50e16"
+PREV_TXID=$(bitcoin-cli -regtest decoderawtransaction "01000000000101c8b0928edebbec5e698d5f86d0474595d9f6a5b2e4e3772cd9d1005f23bdef772500000000ffffffff0276b4fa0000000000160014f848fe5267491a8a5d32423de4b0a24d1065c6030e9c6e000000000016001434d14a23d2ba08d3e3edee9172f0c97f046266fb0247304402205fee57960883f6d69acf283192785f1147a3e11b97cf01a210cf7e9916500c040220483de1c51af5027440565caead6c1064bac92cb477b536e060f004c733c45128012102d12b6b907c5a1ef025d0924a29e354f6d7b1b11b5a7ddff94710d6f0042f3da800000000" | jq -r '.txid')
 VOUT_0=0
 VOUT_1=1
 
 # Destination and amounts:
 DEST_ADDR="2MvLcssW49n9atmksjwg2ZCMsEMsoj3pzUP"
 DEST_AMOUNT="0.20000000"     # 0.2 BTC (20,000,000 sat)
-CHANGE_ADDR=$(bitcoin-cli -regtest -rpcwallet=btrustwallet getnewaddress "SegWit Address" bech32)  # Must be in your wallet
-CHANGE_AMOUNT="0.03678108"   # leftover after paying 0.2 BTC + 0.00001000 BTC fee
 
-# Construct inputs array with RBF (sequence < 0xffffffff)
-# For example, we use 0xfffffffd = 4294967293
+# Construct inputs array with RBF (sequence = 4294967293 = 0xfffffffd)
 inputs=$(cat <<EOF
 [
   {
     "txid": "$PREV_TXID",
     "vout": $VOUT_0,
-    "sequence": 4294967293
+    "sequence": 1  
   },
   {
     "txid": "$PREV_TXID",
     "vout": $VOUT_1,
-    "sequence": 4294967293
+    "sequence": 1  
   }
 ]
 EOF
 )
 
-# Construct outputs object
+# Construct outputs object (no change output)
 outputs=$(cat <<EOF
 {
-  "$DEST_ADDR": $DEST_AMOUNT,
-  "$CHANGE_ADDR": $CHANGE_AMOUNT
+  "$DEST_ADDR": $DEST_AMOUNT
 }
 EOF
 )
@@ -51,3 +46,7 @@ unsigned_hex="$(
     "$outputs"
 )"
 echo "$unsigned_hex"
+
+
+
+
