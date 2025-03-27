@@ -19,8 +19,8 @@ DEST_AMOUNT="0.20000000"  # 20,000,000 sats
 unsigned_hex="$(
   bitcoin-cli -regtest -rpcwallet=btrustwallet createrawtransaction \
     "[
-       {\"txid\":\"$PREV_TXID\",\"vout\":$VOUT_0, \"sequence\":4294967293},
-       {\"txid\":\"$PREV_TXID\",\"vout\":$VOUT_1, \"sequence\":4294967293}
+       {\"txid\":\"$PREV_TXID\",\"vout\":$VOUT_0, \"sequence\": 1},
+       {\"txid\":\"$PREV_TXID\",\"vout\":$VOUT_1, \"sequence\": 1}
      ]" \
     "{
        \"$DEST_ADDR\": $DEST_AMOUNT
@@ -29,3 +29,7 @@ unsigned_hex="$(
 
 # 5) Output the hex
 echo "$unsigned_hex"
+
+0200000002160ee5dd146316bb3400ede0d4ad512ab9c1ede486ab5a119a2ee9d4379fc123000000000001000000160ee5dd146316bb3400ede0d4ad512ab9c1ede486ab5a119a2ee9d4379fc12301000000000100000001002d31010000000017a91421ed90762e16eaaea188aae19142e5b25bf75d238700000000
+
+0200000002160ee5dd146316bb3400ede0d4ad512ab9c1ede486ab5a119a2ee9d4379fc123000000000001000000160ee5dd146316bb3400ede0d4ad512ab9c1ede486ab5a119a2ee9d4379fc12301000000000100000001002d31010000000017a91421ed90762e16eaaea188aae19142e5b25bf75d238700000000
