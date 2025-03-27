@@ -68,7 +68,7 @@ echo "Number of outputs: $NUM_OUTPUTS"
 
 # STUDENT TASK: Extract the value of the first output in satoshis
 # WRITE YOUR SOLUTION BELOW:
-FIRST_OUTPUT_VALUE=$(bitcoin-cli decoderawtransaction "$BASE_TX" | jq -r '(.vout[0].value * 100000000) | floor')
+FIRST_OUTPUT_VALUE=$(bitcoin-cli -regtest decoderawtransaction "$BASE_TX" | jq -r '(.vout[0].value * 100000000) | floor')
 check_cmd "Output value extraction" "FIRST_OUTPUT_VALUE" "$FIRST_OUTPUT_VALUE"
 
 echo "First output value: $FIRST_OUTPUT_VALUE satoshis"
@@ -335,8 +335,6 @@ check_cmd "Parent TXID extraction" "PARENT_TXID" "$PARENT_TXID"
 echo "Parent transaction ID: $PARENT_TXID"
 
 
-echo "RAW TX: $RAW_TX"
-
 # STEP 2: Find the change output index (using CHANGE_ADDRESS)
 CHANGE_OUTPUT_INDEX=$(echo "$DECODED_TX" | jq -r --arg addr "$CHANGE_ADDRESS" '
   [.vout[] | select(.scriptPubKey.address == $addr) | .n] | first
@@ -361,11 +359,11 @@ CHILD_TX_SIZE=$((10 + 68 + 31))  # = 109 vbytes
 check_cmd "Child transaction size calculation" "CHILD_TX_SIZE" "$CHILD_TX_SIZE"
 
 CHILD_FEE_RATE=20
-CHILD_FEE_SATS=$((CHILD_TX_SIZE * CHILD_FEE_RATE))
+CHILD_FEE_SATS=$(($CHILD_TX_SIZE * $CHILD_FEE_RATE))
 check_cmd "Child fee calculation" "CHILD_FEE_SATS" "$CHILD_FEE_SATS"
 
 # STEP 5: Calculate send amount (CHANGE_AMOUNT - fee)
-CHILD_SEND_AMOUNT=$((CHANGE_AMOUNT - CHILD_FEE_SATS))
+CHILD_SEND_AMOUNT=$(($CHANGE_AMOUNT - $CHILD_FEE_SATS))
 check_cmd "Child amount calculation" "CHILD_SEND_AMOUNT" "$CHILD_SEND_AMOUNT"
 
 # Convert to BTC
@@ -411,13 +409,6 @@ check_cmd "Secondary TXID extraction" "SECONDARY_TXID" "$SECONDARY_TXID"
 
 SECONDARY_ADDR="bcrt1qxhy8dnae50nwkg6xfmjtedgs6augk5edj2tm3e"
 
-# Find which output to spend (e.g., by matching your own address)
-# TIMELOCK_OUTPUT_INDEX=$(bitcoin-cli -regtest decoderawtransaction "$SECONDARY_TX" | jq -r --arg addr "$SECONDARY_ADDR" '
-#   [.vout[] | select(.scriptPubKey.address == $addr) | .n] | first
-# ')
-
-# SECONDARY_OUTPUT_VALUE=$(bitcoin-cli -regtest decoderawtransaction "$SECONDARY_TX" | jq -r '.vout[1].value')
-
 
 TIMELOCK_OUTPUT_INDEX=1
 # STEP 1: Input JSON with 10-block CSV relative timelock
@@ -440,7 +431,7 @@ TIMELOCK_ADDRESS="bcrt1qxhy8dnae50nwkg6xfmjtedgs6augk5edj2tm3e"
 #   [.vout[] | select(.scriptPubKey.address == $addr) | .value] | first
 # ')
 SECONDARY_OUTPUT_VALUE=$(bitcoin-cli -regtest decoderawtransaction "$SECONDARY_TX" | jq -r '.vout[1].value')
-echo $SECONDARY_OUTPUT_VALUE
+
 # check_cmd "Secondary output value extraction" "SECONDARY_OUTPUT_VALUE" "$SECONDARY_OUTPUT_VALUE"
 
 # STEP 3: Subtract fee and calculate amount to send (in satoshis)
@@ -461,7 +452,7 @@ TIMELOCK_OUTPUTS="$(
 check_cmd "Timelock output creation" "TIMELOCK_OUTPUTS" "$TIMELOCK_OUTPUTS"
 
 # STEP 5: Create the raw transaction (no absolute locktime, just relative sequence)
-TIMELOCK_TX=$(bitcoin-cli createrawtransaction "$TIMELOCK_INPUTS" "$TIMELOCK_OUTPUTS")
+TIMELOCK_TX=$(bitcoin-cli -regtest createrawtransaction "$TIMELOCK_INPUTS" "$TIMELOCK_OUTPUTS")
 check_cmd "Timelock transaction creation" "TIMELOCK_TX" "$TIMELOCK_TX"
 
 echo "Successfully created transaction with 10-block relative timelock!"
